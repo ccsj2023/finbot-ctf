@@ -28,10 +28,18 @@ app.add_middleware(SessionMiddleware)
 # Register error handlers
 register_error_handlers(app)
 
+import os
+from pathlib import Path
+
+# Define the uploads directory path
+UPLOAD_DIR = Path(__file__).resolve().parent.parent / "uploads"
+
+# Ensure the directory exists
+os.makedirs(UPLOAD_DIR, exist_ok=True)
+
 # Mount Static Files
 app.mount("/static", StaticFiles(directory="finbot/static"), name="static")
-app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
-
+app.mount("/uploads", StaticFiles(directory=UPLOAD_DIR), name="uploads")
 
 # Mount all the applications for the platform
 app.mount("/vendor", vendor_app)
