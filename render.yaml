@@ -8,7 +8,7 @@ services:
       - key: FLASK_ENV
         value: production
       - key: FLASK_APP
-        value: src/main.py
+        value: run.py
       - key: PORT
         fromService:
           type: web
