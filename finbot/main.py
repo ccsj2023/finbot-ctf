@@ -80,11 +80,19 @@ async def session_status(
 @app.on_event("startup")
 async def startup_event():
     """Application startup tasks"""
-    # Clean up expired sessions on startup
+    # 1) Ensure the DB schema exists
+    try:
+        from finbot.core.db_bootstrap import create_all_tables
+        create_all_tables()
+        print("✅ Database schema ensured/created")
+    except Exception as e:
+        # If something is wrong with models/imports, fail early with a clear message
+        raise RuntimeError(f"Database bootstrap failed: {e}") from e
+
+    # 2) Now it’s safe to access tables
     cleaned_count = session_manager.cleanup_expired_sessions()
     if cleaned_count > 0:
         print(f"🧹 Cleaned up {cleaned_count} expired sessions on startup")
-
 
 if __name__ == "__main__":
     import uvicorn
