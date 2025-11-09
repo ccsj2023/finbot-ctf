@@ -79,6 +79,28 @@ class Settings(BaseSettings):
     NAMESPACE_PREFIX: str = "user_"
     ENABLE_NAMESPACE_ISOLATION: bool = True
 
+    # Redis Config
+    REDIS_URL: str = "redis://localhost:6379"
+    REDIS_STREAM_MAX_LEN: int = 10000
+    REDIS_CONSUMER_TIMEOUT: int = 1000
+    REDIS_RESULT_TTL: int = 3600  # 1 hour
+
+    # Event Bus Config
+    EVENT_BUFFER_SIZE: int = 10000
+
+    # LLM Config
+    LLM_PROVIDER: str = "openai"
+    LLM_DEFAULT_MODEL: str = "gpt-5-nano"
+    LLM_DEFAULT_TEMPERATURE: float = 1
+    LLM_MAX_TOKENS: int = 1000
+    LLM_TIMEOUT: int = 30
+
+    # Agent Config
+    AGENT_MAX_ITERATIONS: int = 10
+
+    # OpenAI Config
+    OPENAI_API_KEY: str = ""
+
     # Development Config
     RELOAD: bool = True
     LOG_LEVEL: str = "info"
