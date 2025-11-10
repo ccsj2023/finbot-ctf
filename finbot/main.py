@@ -93,28 +93,30 @@ async def startup_event():
         # Create the user_sessions table if it's missing (safe on SQLite & Postgres)
         with engine.begin() as conn:
             conn.execute(text("""
-                CREATE TABLE IF NOT EXISTS user_sessions (
-                    session_id TEXT PRIMARY KEY,
+                CREATE TABLE IF NOT EXISTS vendors (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
                     namespace TEXT,
-                    user_id TEXT,
+                    company_name TEXT,
+                    vendor_category TEXT,
+                    industry TEXT,
+                    services TEXT,
+                    contact_name TEXT,
                     email TEXT,
-                    is_temporary BOOLEAN,
-                    session_data TEXT,
-                    signature TEXT,
-                    user_agent TEXT,
-                    last_rotation TIMESTAMP,
-                    rotation_count INTEGER,
-                    strict_fingerprint TEXT,
-                    loose_fingerprint TEXT,
-                    original_ip TEXT,
-                    current_ip TEXT,
-                    current_vendor_id TEXT,
+                    phone TEXT,
+                    tin TEXT,
+                    bank_account_number TEXT,
+                    bank_name TEXT,
+                    bank_routing_number TEXT,
+                    bank_account_holder_name TEXT,
+                    status TEXT,
+                    trust_level INTEGER,
+                    risk_level INTEGER,
+                    agent_notes TEXT,
                     created_at TIMESTAMP,
-                    last_accessed TIMESTAMP,
-                    expires_at TIMESTAMP
+                    updated_at TIMESTAMP
                 )
             """))
-        print("✅ Ensured user_sessions table exists")
+        print("✅ Ensured user_sessions and vendors tables exist")
     except Exception as e:
         raise RuntimeError(f"Database bootstrap failed: {e}") from e
 
