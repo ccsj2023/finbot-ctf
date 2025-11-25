@@ -85,96 +85,26 @@ async def session_status(
 async def startup_event():
     """Application startup tasks"""
 
-    # 1) Ensure DB exists and required tables are present
     try:
-        from sqlalchemy import create_engine, text
+        print("🗄️ Running database setup...")
+        # Import the existing setup function from script
+        from scripts.setup_database import main as setup_database_main
 
-        from finbot.config import settings
+        # Run the setup process (handles DB creation + tables)
+        setup_database_main()
 
-        engine = create_engine(
-            settings.get_database_url(),
-            **settings.get_database_config(),
-        )
+        print("✅ Database setup completed successfully")
 
-        # Create required tables (idempotent)
-        with engine.begin() as conn:
-            # --- user_sessions (needed by session cleanup) ---
-            conn.execute(
-                text("""
-                CREATE TABLE IF NOT EXISTS user_sessions (
-                    session_id TEXT PRIMARY KEY,
-                    namespace TEXT,
-                    user_id TEXT,
-                    email TEXT,
-                    is_temporary BOOLEAN,
-                    session_data TEXT,
-                    signature TEXT,
-                    user_agent TEXT,
-                    last_rotation TIMESTAMP,
-                    rotation_count INTEGER,
-                    strict_fingerprint TEXT,
-                    loose_fingerprint TEXT,
-                    original_ip TEXT,
-                    current_ip TEXT,
-                    current_vendor_id TEXT,
-                    created_at TIMESTAMP,
-                    last_accessed TIMESTAMP,
-                    expires_at TIMESTAMP
-                )
-            """)
-            )
-            conn.execute(
-                text(
-                    "CREATE INDEX IF NOT EXISTS ix_user_sessions_namespace ON user_sessions(namespace)"
-                )
-            )
-            conn.execute(
-                text(
-                    "CREATE INDEX IF NOT EXISTS ix_user_sessions_expires_at ON user_sessions(expires_at)"
-                )
-            )
-
-            # --- vendors (your existing schema) ---
-            conn.execute(
-                text("""
-                CREATE TABLE IF NOT EXISTS vendors (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    namespace TEXT,
-                    company_name TEXT,
-                    vendor_category TEXT,
-                    industry TEXT,
-                    services TEXT,
-                    contact_name TEXT,
-                    email TEXT,
-                    phone TEXT,
-                    tin TEXT,
-                    bank_account_number TEXT,
-                    bank_name TEXT,
-                    bank_routing_number TEXT,
-                    bank_account_holder_name TEXT,
-                    status TEXT,
-                    trust_level INTEGER,
-                    risk_level INTEGER,
-                    agent_notes TEXT,
-                    created_at TIMESTAMP,
-                    updated_at TIMESTAMP
-                )
-            """)
-            )
-            conn.execute(
-                text(
-                    "CREATE INDEX IF NOT EXISTS ix_vendors_namespace ON vendors(namespace)"
-                )
-            )
-
-        print("✅ Ensured user_sessions and vendors tables exist")
     except Exception as e:
-        raise RuntimeError(f"Database bootstrap failed: {e}") from e
+        raise RuntimeError(f"Database setup failed: {e}") from e
 
     # 2) Now it's safe to access tables
-    cleaned_count = session_manager.cleanup_expired_sessions()
-    if cleaned_count > 0:
-        print(f"🧹 Cleaned up {cleaned_count} expired sessions on startup")
+    try:
+        cleaned_count = session_manager.cleanup_expired_sessions()
+        if cleaned_count > 0:
+            print(f"🧹 Cleaned up {cleaned_count} expired sessions on startup")
+    except Exception as e:
+        print(f"⚠️ Session cleanup skipped due to: {e}")
 
 
 if __name__ == "__main__":
